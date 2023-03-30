@@ -58,12 +58,12 @@ function init()
     	for(var j=1; j<=board_info.cnt_col; j++)
     	{
     		var idx=hash(i, j);
-    		if(flag[idx]) state[i][j]=-1;
-    		var cell=document.createElement('cell');
+		var cell=document.createElement('cell');
     		cell.classList.add("cellset");
     		cell.textContent="";
     		cell.xpos=i;
     		cell.ypos=j;
+    		if(flag[idx]) state[i][j]=-1;
     		else
     		{
     			for(var x=-1; x<1; x++)
