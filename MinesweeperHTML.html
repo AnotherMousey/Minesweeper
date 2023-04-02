@@ -3,13 +3,16 @@
 <html>
 <head>
 	<meta charset="UTF-8">
-	<meta http-equiv="refresh" content=5> 
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<meta name="author" content="AnotherMousey">
 	<meta name="keywords" content="htmp, js, javascript, css">
-	<script src="beginteststuff.js"> </script>
+	<script src="MinesweeperJavaScript.js"> </script>
+	<link rel="stylesheet" href="MinesweeperCSS.css" type="text/css">
 </head>
 <body>
-	<button onclick="init()"> New game! </button>
+	<div id="box">
+        <button type="button" onclick="newgame()"> New game! </button>
+        <div id="MinesweeperBoard"> </div>  
+    </div>
 </body>
 </html>
