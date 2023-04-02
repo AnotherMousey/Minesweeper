@@ -50,7 +50,9 @@ function init()
         for (var j=1; j<=board_info.cnt_col; j++) 
         {
             td = document.createElement('td');
+            td.id=hash(i, j);
             row.appendChild(td);
+            td.textContent='';
             addCellListener(td, i, j);
         }
         table.appendChild(row);
@@ -61,17 +63,12 @@ function init()
     	for(var j=1; j<=board_info.cnt_col; j++)
     	{
     		var idx=hash(i, j);
-    		var cell=document.createElement('cell');
-    		cell.classList.add("cellset");
-    		cell.textContent="";
-    		cell.xpos=i;
-    		cell.ypos=j;
     		if(flag[idx]) state[i][j]=-1;
     		else
     		{
-    			for(var x=-1; x<1; x++)
+    			for(var x=-1; x<=1; x++)
     			{
-    				for(var y=-1; y<1; y++)
+    				for(var y=-1; y<=1; y++)
     				{
     					if(x==0 && y==0) continue;
     					var new_i=i+x, new_j=j+y;
@@ -87,44 +84,45 @@ function init()
 function addCellListener(td, i, j)
 {
 	td.addEventListener('mousedown', function(){
-        cell_click(i, j);
+        cell_click(this, i, j);
     });
 }
 
-function reveal(i, j)
+function reveal(cell, i, j)
 {
 	clicked[i][j]=true;
 	cnt++;
 	if(state[i][j]==-1)
 	{
 		board_info.dead=true;
-		this.textContent='X';
+		cell.textContent='X';
 		toggleEndGame();
 	}
 	if(state[i][j]>0) 
 	{
-		this.textContent = state[i][j];
+		cell.textContent = state[i][j];
 		return;
 	}
-	this.textContent='0';
-	for(var x=-1; x<1; x++)
+	cell.textContent='0';
+	for(var x=-1; x<=1; x++)
    	{
-    	for(var y=-1; y<1; y++)
+    	for(var y=-1; y<=1; y++)
     	{
     		if(x==0 && y==0) continue;
     		var new_i=i+x, new_j=j+y;
     		if(new_i<1 || new_j<1 || new_i>board_info.cnt_row || new_j>board_info.cnt_col) continue;
     		if(clicked[new_i][new_j]) continue;
-    		if(state[new_i][new_j]>=0) reveal(new_i, new_j);
+    		let nextcell=document.getElementById(hash(new_i, new_j));
+    		if(state[new_i][new_j]>=0) reveal(nextcell, new_i, new_j);
     	}
     }
 }
 
-function cell_click(i, j)
+function cell_click(cell, i, j)
 {
-	if(board_info.dead=true) return;
+	if(board_info.dead) return;
 	if(clicked[i][j]) return;
-	reveal(i, j);
+	reveal(cell, i, j);
 	if(cnt==board_info.cnt_row*board_info.cnt_col-board_info.cnt_bomb) toggleEndGame();
 }
 
