@@ -1,2 +1,8 @@
 # Minesweeper
-A html+css+js game code minesweeper. The code is not completed yet, there might be some bugs. Only js and html yet available.
+A html+css+js game code minesweeper.
+### This code present several features: 
+- Normal minesweeper without clock
+- Flag using scroll
+- Alert how many bombs left
+- End message
+Clock will be added soon
