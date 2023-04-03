@@ -5,7 +5,7 @@ var board_info =
 {
 	cnt_row : 13,
 	cnt_col : 30,
-	cnt_bomb : 40,
+	cnt_bomb : 80,
 	bomb : '💣',
 	flag : '🚩',
 	dead : false,
@@ -129,8 +129,8 @@ function toggle_flag(cell, i, j)
 
 function reveal(cell, i, j)
 {
+	if(clicked[i][j]==false) cnt++;
 	clicked[i][j]=true;
-	cnt++;
 	if(rightflag[i][j]) cntflag--;
 	if(state[i][j]==-1)
 	{
@@ -162,11 +162,40 @@ function reveal(cell, i, j)
     }
 }
 
+function check_next(cell, i, j)
+{
+	var count=0;
+	for(var x=-1; x<=1; x++)
+   	{
+    	for(var y=-1; y<=1; y++)
+    	{
+    		if(x==0 && y==0) continue;
+    		var new_i=i+x, new_j=j+y;
+    		if(new_i<1 || new_j<1 || new_i>board_info.cnt_row || new_j>board_info.cnt_col) continue;
+    		if(rightflag[new_i][new_j]) count++;
+    	}
+    }
+    if(state[i][j]==count)
+    {
+    	for(var x=-1; x<=1; x++)
+	   	{
+	    	for(var y=-1; y<=1; y++)
+	    	{
+	    		if(x==0 && y==0) continue;
+	    		var new_i=i+x, new_j=j+y;
+	    		if(new_i<1 || new_j<1 || new_i>board_info.cnt_row || new_j>board_info.cnt_col) continue;
+	    		let new_cell=document.getElementById(hash(new_i, new_j));
+	    		if(rightflag[new_i][new_j]==false) reveal(new_cell, new_i, new_j);
+	    	}
+	    }
+    }
+}
+
 function cell_click(cell, i, j)
 {
 	if(board_info.dead) return;
-	if(clicked[i][j]) return;
-	reveal(cell, i, j);
+	if(clicked[i][j]) check_next(cell, i, j);
+	else reveal(cell, i, j);
 	if(cnt==board_info.cnt_row*board_info.cnt_col-board_info.cnt_bomb) toggleEndGame();
 }
 
@@ -177,6 +206,17 @@ function toggleEndGame()
 	{
 		document.getElementById("EndGame").innerHTML="You win!";
 		document.getElementById("EndGame").style.color="green";
+		for(var i=1; i<=board_info.cnt_row; i++)
+		{
+			for(var j=1; j<=board_info.cnt_col; j++)
+			{
+				if(flag[hash(i, j)]) 
+				{
+					let cell=document.getElementById(hash(i, j));
+					cell.textContent=board_info.flag;
+				}
+			}
+		}
 		board_info.dead=true;
 		return;
 	}
