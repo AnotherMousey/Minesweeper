@@ -26,6 +26,7 @@ body{
 #EndGame {
     font-size: 300%;
     font-weight: bold;
+    color: blue;
 }
 
 button {
