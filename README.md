@@ -5,4 +5,5 @@ A html+css+js game code minesweeper.
 - Flag using scroll
 - Alert how many bombs left
 - End message
+
 Clock will be added soon
