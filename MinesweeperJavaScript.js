@@ -3,29 +3,41 @@ const board = document.getElementById("board");
 
 var board_info =
 {
-	cnt_row : 10,
-	cnt_col : 10,
-	cnt_bomb : 10,
-	dead : false
+	cnt_row : 13,
+	cnt_col : 30,
+	cnt_bomb : 40,
+	bomb : '💣',
+	flag : '🚩',
+	dead : false,
+	colors : {1: 'blue', 2: 'green', 3: 'red', 4: 'purple', 5: 'maroon', 6: 'turquoise', 7: 'black', 8: 'grey'}
 };
 
-let state = new Array(11);
-for(var i=1; i<=10; i++)
+let state = new Array(board_info.cnt_row+1);
+for(var i=1; i<=board_info.cnt_row; i++)
 {
-	state[i] = new Array(11).fill(0);
+	state[i] = new Array(board_info.cnt_col+1).fill(0);
 }
+
 var cnt=0;
+var cntflag=0;
 
 function rng(l, r)
 {
 	return Math.floor(Math.random()*(r-l+1))+l;
 }
 
-let flag = new Array(101).fill(false);
-let clicked = new Array(11);
-for(var i=1; i<=10; i++)
+let flag = new Array(board_info.cnt_col*board_info.cnt_row+1).fill(false);
+
+let clicked = new Array(board_info.cnt_row+1);
+for(var i=1; i<=board_info.cnt_row; i++)
 {
-	clicked[i] = new Array(11).fill(false);
+	clicked[i] = new Array(board_info.cnt_col+1).fill(false);
+}
+
+let rightflag = new Array(board_info.cnt_row+1);
+for(var i=1; i<=board_info.cnt_row; i++)
+{
+	rightflag[i] = new Array(board_info.cnt_col+1).fill(false);
 }
 
 function hash(i, j)
@@ -36,10 +48,11 @@ function hash(i, j)
 function init()
 {
 	var bomb = new Set();
-	while(bomb.size <= board_info.cnt_bomb)
+	while(bomb.size < board_info.cnt_bomb)
 	{
-		var idx=rng(1, 100);
-		bomb.add(idx);
+		var idx=rng(1, hash(board_info.cnt_row, board_info.cnt_col));
+		if(flag[idx]) continue;
+		bomb.add(idx-1);
 		flag[idx]=true;
 	} //add bombs
 	var table=document.createElement('table');
@@ -79,31 +92,62 @@ function init()
     		}
     	}
     }
+    alertbomb();
 }
 
 function addCellListener(td, i, j)
 {
-	td.addEventListener('mousedown', function(){
-        cell_click(this, i, j);
+	td.addEventListener('mousedown', function(event){
+        if(event.which==1) cell_click(this, i, j);
+        else if(event.which==2) toggle_flag(this, i, j);
+        if(board_info.dead==false) alertbomb();
     });
+}
+
+function alertbomb()
+{
+	document.getElementById("EndGame").innerHTML=(board_info.cnt_bomb-cntflag) + " bombs left";
+}
+
+function toggle_flag(cell, i, j)
+{
+	if(board_info.dead) return;
+	if(clicked[i][j]) return;
+	if(rightflag[i][j]==false)
+	{
+		cell.textContent=board_info.flag;
+		rightflag[i][j]=true;
+		cntflag++;
+	}
+	else
+	{
+		cell.textContent='';
+		rightflag[i][j]=false;
+		cntflag--;
+	}
 }
 
 function reveal(cell, i, j)
 {
 	clicked[i][j]=true;
 	cnt++;
+	if(rightflag[i][j]) cntflag--;
 	if(state[i][j]==-1)
 	{
+		cell.style.backgroundColor = 'red';
 		board_info.dead=true;
-		cell.textContent='X';
+		cell.textContent=board_info.bomb;
 		toggleEndGame();
+		return;
 	}
+	cell.style.backgroundColor = 'lightGrey';
 	if(state[i][j]>0) 
 	{
 		cell.textContent = state[i][j];
+		cntbomb=state[i][j];
+		cell.style.color=board_info.colors[cntbomb];
 		return;
 	}
-	cell.textContent='0';
 	for(var x=-1; x<=1; x++)
    	{
     	for(var y=-1; y<=1; y++)
@@ -126,21 +170,33 @@ function cell_click(cell, i, j)
 	if(cnt==board_info.cnt_row*board_info.cnt_col-board_info.cnt_bomb) toggleEndGame();
 }
 
-// function toggleEndGame()
-// {
-// 	Let cellset=document.getElementsByClassName("cellset");
-// 	for(var i=1; i<=board_info.cnt_row; i++)
-// 	{
-// 		for(var j=1; j<=board_info.cnt_col; j++)
-// 		{
-// 			if(clicked[i][j]) continue;
-// 			if(state[i][j]>=0) cellset[hash(i, j)].textContent=state[i][j];
-// 			else cellset[hash(i, j)].textContent='X';
-// 		}
-// 	}
-// 	if(board_info.dead) document.getElementById("EndGame").textContent="You lose";
-// 	else document.getElementById("EndGame").textContent="You win";
-// }
+function toggleEndGame()
+{
+	cnt=0;
+	if(board_info.dead==false)
+	{
+		document.getElementById("EndGame").innerHTML="You win!";
+		document.getElementById("EndGame").style.color="green";
+		board_info.dead=true;
+		return;
+	}
+	for(var i=1; i<=board_info.cnt_row; i++)
+	{
+		for(var j=1; j<=board_info.cnt_col; j++)
+		{
+			if(clicked[i][j]) continue;
+			let cell=document.getElementById(hash(i, j));
+			if(state[i][j]>=0) continue;
+			else
+			{
+				cell.textContent=board_info.bomb;
+				cell.style.backgroundColor = 'red';
+			}
+		}
+	}
+	document.getElementById("EndGame").innerHTML="You lose!";
+	document.getElementById("EndGame").style.color="red";
+}
 
 window.addEventListener('load', function() {
     init();
@@ -149,4 +205,5 @@ window.addEventListener('load', function() {
 function newgame()
 {
 	window.location.reload();
+	board_info.dead=false;
 }
