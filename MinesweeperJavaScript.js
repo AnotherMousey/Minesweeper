@@ -9,6 +9,7 @@ var board_info =
 	bomb : '💣',
 	flag : '🚩',
 	dead : false,
+	begin : false,
 	colors : {1: 'blue', 2: 'green', 3: 'red', 4: 'purple', 5: 'maroon', 6: 'turquoise', 7: 'black', 8: 'grey'}
 };
 
@@ -98,9 +99,12 @@ function init()
 function addCellListener(td, i, j)
 {
 	td.addEventListener('mousedown', function(event){
+        
         if(event.which==1) cell_click(this, i, j);
-        else if(event.which==2) toggle_flag(this, i, j);
         if(board_info.dead==false) alertbomb();
+    });
+    td.addEventListener('contextmenu', function(event){
+        toggle_flag(event, this, i, j);
     });
 }
 
@@ -109,8 +113,9 @@ function alertbomb()
 	document.getElementById("EndGame").innerHTML=(board_info.cnt_bomb-cntflag) + " bombs left";
 }
 
-function toggle_flag(cell, i, j)
+function toggle_flag(event,cell, i, j)
 {
+    event.preventDefault();
 	if(board_info.dead) return;
 	if(clicked[i][j]) return;
 	if(rightflag[i][j]==false)
@@ -191,8 +196,46 @@ function check_next(cell, i, j)
     }
 }
 
+function convert(cnt)
+{
+	var hr=0, mn=0, sc=0, milis=0;
+	milis=cnt%100;
+	cnt=Math.floor(cnt/100);
+	sc=cnt%60;
+	cnt=Math.floor(cnt/60);
+	mn=cnt%60;
+	cnt=Math.floor(cnt/60);
+	hr=cnt;
+	var h, m, s, ms;
+	if(hr<10) h='0'+hr;
+	else h=hr;
+	if(mn<10) m='0'+mn;
+	else m=mn;
+	if(sc<10) s='0'+sc;
+	else s=sc;
+	if(milis<10) ms='0'+milis;
+	else ms=milis;
+	return ''+h+':'+m+':'+s+':'+ms;
+}
+
+let clock=null;
+
+function startTimer()
+{
+	var cur=0;
+	clock=setInterval(function(){
+		document.getElementById("Timer").innerHTML=convert(cur);
+		cur+=1;
+	}, 10)
+}
+
 function cell_click(cell, i, j)
 {
+	if(!board_info.begin)
+	{
+		startTimer();
+		board_info.begin=true;
+	}
 	if(board_info.dead) return;
 	if(clicked[i][j]) check_next(cell, i, j);
 	else reveal(cell, i, j);
@@ -201,6 +244,7 @@ function cell_click(cell, i, j)
 
 function toggleEndGame()
 {
+	clearInterval(clock);
 	cnt=0;
 	if(board_info.dead==false)
 	{
@@ -227,11 +271,7 @@ function toggleEndGame()
 			if(clicked[i][j]) continue;
 			let cell=document.getElementById(hash(i, j));
 			if(state[i][j]>=0) continue;
-			else
-			{
-				cell.textContent=board_info.bomb;
-				cell.style.backgroundColor = 'red';
-			}
+			else cell.textContent=board_info.bomb;
 		}
 	}
 	document.getElementById("EndGame").innerHTML="You lose!";
@@ -239,6 +279,7 @@ function toggleEndGame()
 }
 
 window.addEventListener('load', function() {
+	document.getElementById("Timer").innerHTML=convert(0);
     init();
 });
 
@@ -246,4 +287,5 @@ function newgame()
 {
 	window.location.reload();
 	board_info.dead=false;
+	begin=false;
 }
